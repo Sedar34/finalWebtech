@@ -1,0 +1,221 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100">
+
+<header class="bg-white shadow">
+  <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+    <div id="logo" class="text-2xl font-bold text-gray-800" data-i18n="logoText">Tennis Club</div>
+    <ul class="flex space-x-4">
+      <li><a th:href="@{/admin}" class="text-gray-600 hover:text-gray-800" data-i18n="adminLink">Admin</a></li>
+      <li>
+        <button class="relative text-gray-600 hover:text-gray-800" onclick="toggleNotifications()">
+          <i class="fas fa-bell"></i>
+          <span id="notification-count" class="absolute top-0 right-0 inline-block w-4 h-4 text-xs font-bold text-white bg-red-600 rounded-full">0</span>
+        </button>
+      </li>
+    </ul>
+    <div class="flex items-center space-x-4">
+      <a th:href="@{/logout}" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700" data-i18n="logout">Logout</a>
+      <select id="language-select" onchange="setLanguage(this.value)" class="px-2 py-1 border rounded">
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="es">Español</option>
+      </select>
+    </div>
+  </div>
+  <div id="notification-dropdown" class="hidden absolute right-20 bg-white shadow-lg rounded p-4 w-80 mt-2">
+    <h6 class="font-bold text-gray-800" data-i18n="notifications">Notifications</h6>
+    <div id="notification-list"></div>
+  </div>
+</header>
+
+<div class="container mx-auto px-4 py-8">
+  <h3 class="text-2xl font-bold text-gray-800 mb-4" data-i18n="dashboardHeading">Admin Dashboard</h3>
+  <div class="mb-6 flex space-x-4">
+    <a th:href="@{/admin/add}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" data-i18n="addNewMember">Add New Member</a>
+    <a th:href="@{/admin/search}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" data-i18n="searchMember">Search Member</a>
+    <a th:href="@{/admin/download/users}" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700" data-i18n="downloadData">Download Data</a>
+    <a th:href="@{/admin/upload/furniture}" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700" data-i18n="uploadData">Upload Data</a>
+  </div>
+  <table class="min-w-full bg-white shadow-md rounded overflow-hidden">
+    <thead class="bg-gray-800 text-white">
+    <tr>
+      <th class="py-2 px-4 text-left" data-i18n="username">Username</th>
+      <th class="py-2 px-4 text-left" data-i18n="firstName">First Name</th>
+      <th class="py-2 px-4 text-left" data-i18n="lastName">Last Name</th>
+      <th class="py-2 px-4 text-left" data-i18n="email">Email</th>
+      <th class="py-2 px-4 text-left" data-i18n="phoneNumber">Phone Number</th>
+      <th class="py-2 px-4 text-left" data-i18n="role">Role</th>m
+      <th class="py-2 px-4 text-left" data-i18n="actions">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${users}" class="border-b hover:bg-gray-50">
+      <td class="py-2 px-4" th:text="${user.username}"></td>
+      <td class="py-2 px-4" th:text="${user.firstName}"></td>
+      <td class="py-2 px-4" th:text="${user.lastName}"></td>
+      <td class="py-2 px-4" th:text="${user.email}"></td>
+      <td class="py-2 px-4" th:text="${user.phoneNumber}"></td>
+      <td class="py-2 px-4" th:text="${user.role}"></td>
+      <td class="py-2 px-4 flex space-x-2">
+        <a th:href="@{/admin/users/edit/{id}(id=${user.id})}" class="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600" data-i18n="edit">Edit</a>
+        <form th:action="@{/admin/users/delete/{id}(id=${user.id})}" method="post" class="inline">
+          <button type="submit" class="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700" data-i18n="delete">Delete</button>
+        </form>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- Notification Form -->
+  <form id="send-notification-form" class="mt-6 bg-white p-4 shadow-md rounded">
+    <div class="mb-4">
+      <label for="title" class="block text-gray-700">Notification Title</label>
+      <input type="text" id="title" name="title" class="w-full px-3 py-2 border rounded" placeholder="Notification Title" required>
+    </div>
+    <div class="mb-4">
+      <label for="message" class="block text-gray-700">Message</label>
+      <textarea id="message" name="message" class="w-full px-3 py-2 border rounded" placeholder="Message" required></textarea>
+    </div>
+    <button type="button" onclick="sendNotification()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Send Notification</button>
+  </form>
+</div>
+
+<!-- Pagination Controls -->
+<nav aria-label="Page navigation" class="mt-6">
+  <ul class="flex justify-center space-x-2">
+    <li th:classappend="${currentPage == 0} ? 'disabled' : ''">
+      <a class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300" th:href="@{/admin(pageNo=${currentPage - 1}, pageSize=${pageSize})}" data-i18n="previous">Previous</a>
+    </li>
+    <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${currentPage == i} ? 'active' : ''">
+      <a class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300" th:href="@{/admin(pageNo=${i}, pageSize=${pageSize})}" th:text="${i + 1}">1</a>
+    </li>
+    <li th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">
+      <a class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300" th:href="@{/admin(pageNo=${currentPage + 1}, pageSize=${pageSize})}" data-i18n="next">Next</a>
+    </li>
+  </ul>
+</nav>
+
+<!-- JavaScript for i18n and other functionalities -->
+<script>
+  const translations = {
+    en: {
+      logoText: "Tennis Club",
+      notifications: "Notifications",
+      logout: "Logout",
+      adminLink: "Admin",
+      dashboardHeading: "Admin Dashboard",
+      addNewMember: "Add New Member",
+      searchMember: "Search Member",
+      downloadData: "Download Data",
+      uploadData: "Upload Data",
+      username: "Username",
+      firstName: "First Name",
+      lastName: "Last Name",
+      email: "Email",
+      phoneNumber: "Phone Number",
+      role: "Role",
+      actions: "Actions",
+      edit: "Edit",
+      delete: "Delete",
+      previous: "Previous",
+      next: "Next"
+    },
+    fr: {
+      logoText: "Club de Tennis",
+      notifications: "Notifications",
+      logout: "Se Déconnecter",
+      adminLink: "Admin",
+      dashboardHeading: "Tableau de Bord Admin",
+      addNewMember: "Ajouter un Membre",
+      searchMember: "Rechercher un Membre",
+      downloadData: "Télécharger les Données",
+      uploadData: "Téléverser les Données",
+      username: "Nom d'Utilisateur",
+      firstName: "Prénom",
+      lastName: "Nom",
+      email: "E-mail",
+      phoneNumber: "Numéro de Téléphone",
+      role: "Rôle",
+      actions: "Actions",
+      edit: "Modifier",
+      delete: "Supprimer",
+      previous: "Précédent",
+      next: "Suivant"
+    },
+    es: {
+      logoText: "Club de Tenis",
+      notifications: "Notificaciones",
+      logout: "Cerrar Sesión",
+      adminLink: "Admin",
+      dashboardHeading: "Panel de Administración",
+      addNewMember: "Agregar Nuevo Miembro",
+      searchMember: "Buscar Miembro",
+      downloadData: "Descargar Datos",
+      uploadData: "Subir Datos",
+      username: "Nombre de Usuario",
+      firstName: "Nombre",
+      lastName: "Apellido",
+      email: "Correo Electrónico",
+      phoneNumber: "Número de Teléfono",
+      role: "Rol",
+      actions: "Acciones",
+      edit: "Editar",
+      delete: "Eliminar",
+      previous: "Anterior",
+      next: "Siguiente"
+    }
+  };
+
+  function setLanguage(language) {
+    document.querySelectorAll("[data-i18n]").forEach(element => {
+      const key = element.getAttribute("data-i18n");
+      if (translations[language] && translations[language][key]) {
+        element.innerText = translations[language][key];
+      }
+    });
+    localStorage.setItem("selectedLanguage", language);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const savedLanguage = localStorage.getItem("selectedLanguage") || "en";
+    document.getElementById("language-select").value = savedLanguage;
+    setLanguage(savedLanguage);
+  });
+
+  function toggleNotifications() {
+    const dropdown = document.getElementById('notification-dropdown');
+    dropdown.classList.toggle('hidden');
+  }
+
+  function sendNotification() {
+    // Implement the notification sending logic here
+  }
+</script>
+
+
+
+
+
+
+</body>
+</html>

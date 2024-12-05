@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Register</title>
+    <style>
+        body {
+            background-size: cover; /* Cover the entire background */
+            background-position: center; /* Center the image */
+            background-repeat: no-repeat; /* Prevent repeating the image */
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* Full viewport height */
+            margin: 0;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.9); /* White background with transparency */
+            border: 1px solid #ccc; /* Border around the box */
+            border-radius: 8px; /* Rounded corners */
+            padding: 30px; /* Inner spacing */
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+            width: 400px; /* Fixed width for the box */
+            text-align: center; /* Centered text */
+        }
+        h2 {
+            margin-bottom: 20px;
+            color: #333; /* Darker text color */
+        }
+        input[type="text"], input[type="email"], input[type="password"], select {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100%; /* Full width of the form */
+            margin-bottom: 15px; /* Space between fields */
+            font-size: 16px; /* Font size */
+        }
+        button {
+            padding: 12px;
+            background-color: #4CAF50; /* Green button */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%; /* Full width of the form */
+            font-size: 16px; /* Font size */
+        }
+        button:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+        p {
+            color: #666; /* Lighter text color */
+            margin-top: 10px; /* Space above the paragraph */
+        }
+        a {
+            color: #4CAF50; /* Link color */
+            text-decoration: none; /* Remove underline */
+        }
+        a:hover {
+            text-decoration: underline; /* Underline on hover */
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Register</h2>
+    <form action="#" th:action="@{/register}" method="post" th:object="${user}">
+        <input type="text" th:field="*{username}" placeholder="Username" required>
+        <input type="email" th:field="*{email}" placeholder="Email" required>
+        <input type="password" th:field="*{password}" placeholder="Password" required>
+
+        <!-- Role selection -->
+        <select th:field="*{role}" required>
+            <option value="" disabled selected>Select your role</option>
+            <option value="ROLE_USER">Customer</option>
+            <option value="ROLE_SELLER">Seller</option>
+        </select>
+
+        <button type="submit">Register</button>
+    </form>
+    <p th:text="${message}"></p>
+    <p><a th:href="@{/login}">Already have an account? Log in</a></p>
+</div>
+</body>
+</html>
